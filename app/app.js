@@ -19,6 +19,8 @@ var app = angular.module('twick', [
     'UserShowFactory',
     'OAuthHeaderService',
     function($scope, UserShowFactory, OAuthHeaderService) {
-        $scope.test = OAuthHeaderService.getAuthorization();
+        // $scope.test = OAuthHeaderService.getAuthorization();
+        $scope.test = UserShowFactory.get('twitterdev');
+
     }
 ]);
