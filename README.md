@@ -1,5 +1,5 @@
 # twick
-Angular app for fetching twitter data.
+AngularJS app for fetching Twitter data.
 
 This app is intended to use only frontend code to fetch from Twitter API.
 
@@ -33,5 +33,15 @@ npm install -g corsproxy
 ```
 $ corsproxy
 ```
-This will run on port 1337, So API responses can be proxied like this: `http://localhost:1337/api.twitter.com/1.1/...`
+This will run on port `1337`, so the API responses can be proxied like this: `http://localhost:1337/api.twitter.com/1.1/...`
 
+> ######Issue with corsproxy
+> [corsproxy](https://github.com/gr2m/CORS-Proxy/blob/d3d5340b40dee06fc9930d54e44953682ff9f312/bin/corsproxy#L44) add ***http*** to the request url. This is ***changed to https*** to resolve Twitter API's `error 92: SSL required`.
+> ```
+> callback(null, 'https://' + request.host + request.path + query, request.headers)
+>```
+
+
+---
+####Extra libs used:
+- OAuth 1.0 signature value is generated using [oauth-signature](https://github.com/bettiolo/oauth-signature-js)
