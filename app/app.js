@@ -16,11 +16,17 @@ var app = angular.module('twick', [
 
 .controller('twickMainController', [
     '$scope',
+    '$log',
     'UserShowFactory',
     'OAuthHeaderService',
-    function($scope, UserShowFactory, OAuthHeaderService) {
-        // $scope.test = OAuthHeaderService.getAuthorization();
-        $scope.test = UserShowFactory.get('twitterdev');
-
+    function($scope, $log, UserShowFactory, OAuthHeaderService) {
+        UserShowFactory.get('void_imagineer')
+            .then(function(data) {
+                $log.debug(data);
+                $scope.test = data;
+            })
+            .catch(function(error) {
+                $log.error(error);
+            })
     }
 ]);
