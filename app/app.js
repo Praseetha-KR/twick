@@ -17,7 +17,8 @@ var app = angular.module('twick', [
 .controller('twickMainController', [
     '$scope',
     'UserShowFactory',
-    function($scope, UserShowFactory) {
-        $scope.test = "Hello, testing!"
+    'OAuthHeaderService',
+    function($scope, UserShowFactory, OAuthHeaderService) {
+        $scope.test = OAuthHeaderService.getAuthorization();
     }
 ]);
