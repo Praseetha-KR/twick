@@ -1,0 +1,32 @@
+{
+  "name": "twick",
+  "version": "0.0.1",
+  "description": "App to test twitter APIs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Praseetha-KR/twick.git"
+  },
+  "keywords": [
+    "REST",
+    "Twitter",
+    "Angular"
+  ],
+  "author": "Praseetha-KR",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Praseetha-KR/twick/issues"
+  },
+  "homepage": "https://github.com/Praseetha-KR/twick#readme",
+  "devDependencies": {
+    "browserify": "^13.0.1",
+    "gulp": "^3.9.1",
+    "gulp-connect": "^4.0.0",
+    "vinyl-source-stream": "^1.1.0"
+  },
+  "dependencies": {
+  }
+}

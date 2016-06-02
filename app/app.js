@@ -1,16 +1,23 @@
-angular.module('twick', ['ngRoute'])
+var app = angular.module('twick', [
+    'ngRoute',
+    require('./apis').name
+])
 
-.config(function($routeProvider) {
-    $routeProvider
-        .when('/', {
-            templateUrl: '/app/main.tpl.html',
-            controller: 'twickMainController'
-        });
-})
+.config([
+    '$routeProvider',
+    function($routeProvider) {
+        $routeProvider
+            .when('/', {
+                templateUrl: '/app/main.tpl.html',
+                controller: 'twickMainController'
+            });
+    }
+])
 
 .controller('twickMainController', [
     '$scope',
-    function($scope) {
+    'UserShowFactory',
+    function($scope, UserShowFactory) {
         $scope.test = "Hello, testing!"
     }
 ]);

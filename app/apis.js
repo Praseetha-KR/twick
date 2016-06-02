@@ -1,4 +1,4 @@
-angular.module('twickApis', [])
+module.exports = angular.module('twickApis', ['ngResource'])
 
 .factory('UserShowFactory', [
     '$resource',
