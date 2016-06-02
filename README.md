@@ -15,6 +15,10 @@ gulp
 
 Listen on [http://localhost:9999](http://localhost:9999)
 
+#####Set twitter access keys
+1. Rename keys-sample.json to keys.json
+2. Copy your twitter app access keys to that file
+
 ---
 ###2. CORS proxy server
 Browsers doesn't accept requested resource if `Access-Control-Allow-Origin` header is not present. Twitter doesn't provide this header on API responses which is secured with *OAuth v1.0*. 
