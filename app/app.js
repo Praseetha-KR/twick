@@ -5,7 +5,7 @@ var app = angular.module('twick', [
 
 .config([
     '$routeProvider',
-    function($routeProvider) {
+    ($routeProvider) => {
         $routeProvider
             .when('/', {
                 templateUrl: '/app/main.tpl.html',
@@ -23,25 +23,15 @@ var app = angular.module('twick', [
 ]);
 
 function twickFn($log, UserFactory, StatusesFactory) {
-    var vm = this;
+    let vm  = this;
     vm.screen_name = 'void_imagineer';
-    vm.showUser = function(screen_name) {
+    vm.showUser = (screen_name) => {
         UserFactory.show(screen_name)
-            .then(function(data) {
-                $log.debug(data);
-                vm.user = data;
-            })
-            .catch(function(error) {
-                $log.error(error);
-            });
+            .then((data) => vm.user = data)
+            .catch((error) => $log.error(error));
 
         StatusesFactory.user_timeline(screen_name)
-            .then(function(data) {
-                $log.debug(data);
-                vm.user_timeline = data;
-            })
-            .catch(function(error) {
-                $log.error(error);
-            });
+            .then((data) => vm.user_timeline = data)
+            .catch((error) => $log.error(error));
     }
 }

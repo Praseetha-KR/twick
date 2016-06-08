@@ -3,9 +3,9 @@ module.exports = angular.module('twickApis', [
 ])
 
 .service('OAuthHeaderService', [
-    function() {
+    () => {
 
-        var _mergeObjs = function(obj1, obj2) {
+        let _mergeObjs = (obj1, obj2) => {
             for (var attr in obj2) {
                 obj1[attr] = obj2[attr];
             }
@@ -13,17 +13,17 @@ module.exports = angular.module('twickApis', [
         }
 
         return {
-            getAuthorization: function(httpMethod, baseUrl, reqParams) {
-                var keysJson            = require('../keys.json');
-                var consumerKey         = keysJson.TWITTER_CONSUMER_KEY,
+            getAuthorization: (httpMethod, baseUrl, reqParams) => {
+                let keysJson            = require('../keys.json');
+                const consumerKey       = keysJson.TWITTER_CONSUMER_KEY,
                     consumerSecret      = keysJson.TWITTER_CONSUMER_SECRET,
                     accessToken         = keysJson.TWITTER_ACCESS_TOKEN,
                     accessTokenSecret   = keysJson.TWITTER_ACCESS_TOKEN_SECRET;
 
-                var timestamp   = Math.round(Date.now() / 1000);
-                var nonce       = btoa(consumerKey + ':' + timestamp);
+                let timestamp   = Math.round(Date.now() / 1000);
+                let nonce       = btoa(consumerKey + ':' + timestamp);
 
-                var oauthParams = {
+                let oauthParams = {
                     oauth_consumer_key      : consumerKey,
                     oauth_token             : accessToken,
                     oauth_nonce             : nonce,
@@ -31,9 +31,9 @@ module.exports = angular.module('twickApis', [
                     oauth_signature_method  : 'HMAC-SHA1',
                     oauth_version           : '1.0'
                 };
-                var params      = _mergeObjs(oauthParams, reqParams);
+                let params      = _mergeObjs(oauthParams, reqParams);
 
-                var encodedSignature = oauthSignature.generate(
+                let encodedSignature = oauthSignature.generate(
                     httpMethod,
                     baseUrl,
                     oauthParams,
@@ -57,12 +57,12 @@ module.exports = angular.module('twickApis', [
 .service('resourceService', [
     '$resource',
     'OAuthHeaderService',
-    function($resource, OAuthHeaderService) {
-        var corsproxyUrl = function(url) {
+    ($resource, OAuthHeaderService) => {
+        let corsproxyUrl = (url) => {
             return 'http://localhost:1337/' + url.replace(/https:\/\//g, '');
         }
         return {
-            configResource: function(httpMethod, url, reqParams, isArray) {
+            configResource: (httpMethod, url, reqParams, isArray) => {
                 return $resource(
                     corsproxyUrl(url),
                     null,
@@ -84,11 +84,11 @@ module.exports = angular.module('twickApis', [
 
 .factory('UserFactory', [
     'resourceService',
-    function(resourceService) {
-        var baseUrl = 'https://api.twitter.com/1.1/users/';
+    (resourceService) => {
+        let baseUrl = 'https://api.twitter.com/1.1/users/';
         return {
-            show: function(screen_name) {
-                var url         = baseUrl + 'show.json',
+            show: (screen_name) => {
+                let url         = baseUrl + 'show.json',
                     httpMethod  = 'GET',
                     reqParams   = { screen_name: screen_name },
                     isArray     = false;
@@ -100,11 +100,11 @@ module.exports = angular.module('twickApis', [
 
 .factory('StatusesFactory', [
     'resourceService',
-    function(resourceService) {
-        var baseUrl = 'https://api.twitter.com/1.1/statuses/';
+    (resourceService) => {
+        let baseUrl = 'https://api.twitter.com/1.1/statuses/';
         return {
-            user_timeline: function(screen_name) {
-                var url         = baseUrl + 'user_timeline.json',
+            user_timeline: (screen_name) => {
+                let url         = baseUrl + 'user_timeline.json',
                     httpMethod  = 'GET',
                     reqParams   = { screen_name: screen_name },
                     isArray     = true;

@@ -1,6 +1,7 @@
 var gulp = require('gulp')
     connect = require('gulp-connect'),
     browserify = require('browserify'),
+    babelify = require('babelify'),
     source = require('vinyl-source-stream');
 
 gulp.task('server', function() {
@@ -16,8 +17,9 @@ gulp.task('html', function() {
         .pipe(connect.reload());
 });
 
-gulp.task('browserify', function() {
+gulp.task('js', function() {
     return browserify('./app/app.js')
+        .transform(babelify, { presets: ['es2015'] })
         .bundle()
         .pipe(source('main.js'))
         .pipe(gulp.dest('./public/js/'));
@@ -25,7 +27,7 @@ gulp.task('browserify', function() {
 
 gulp.task('watch', function() {
     gulp.watch(['./app/*.html'], ['html']);
-    gulp.watch('app/**/*.js', ['browserify']);
+    gulp.watch('app/**/*.js', ['js']);
 });
 
 gulp.task('default', ['server', 'watch']);
