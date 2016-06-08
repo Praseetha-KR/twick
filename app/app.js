@@ -9,24 +9,27 @@ var app = angular.module('twick', [
         $routeProvider
             .when('/', {
                 templateUrl: '/app/main.tpl.html',
-                controller: 'twickMainController'
+                controller: 'twickController',
+                controllerAs: 'vm'
             });
     }
 ])
 
-.controller('twickMainController', [
-    '$scope',
+.controller('twickController', [
     '$log',
-    'UserShowFactory',
-    'OAuthHeaderService',
-    function($scope, $log, UserShowFactory, OAuthHeaderService) {
-        UserShowFactory.get('void_imagineer')
-            .then(function(data) {
-                $log.debug(data);
-                $scope.test = data;
-            })
-            .catch(function(error) {
-                $log.error(error);
-            })
+    'UsersFactory',
+    function($log, UsersFactory) {
+        var vm = this;
+        vm.screen_name = 'void_imagineer';
+        vm.showUser = function(screen_name) {
+            UsersFactory.show(screen_name)
+                .then(function(data) {
+                    $log.debug(data);
+                    vm.data = data;
+                })
+                .catch(function(error) {
+                    $log.error(error);
+                });
+        }
     }
 ]);
