@@ -34,4 +34,12 @@ function twickFn($log, UserFactory, StatusesFactory) {
             .then((data) => vm.user_timeline = data)
             .catch((error) => $log.error(error));
     }
+
+    vm.status = 'Test tweet';
+    vm.tweet = (status) => {
+        status = status;
+        StatusesFactory.update(status)
+            .then((data) => vm.status = '')
+            .catch((error) => $log.error(error));
+    }
 }

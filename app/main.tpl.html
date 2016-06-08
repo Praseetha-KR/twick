@@ -1,6 +1,11 @@
+<form ng-submit="vm.tweet(vm.status)">
+    <input type="text" ng-model="vm.status">
+    <button type="submit">Tweet</button>
+</form>
+
 <form ng-submit="vm.showUser(vm.screen_name)">
     <input type="text" ng-model="vm.screen_name">
-    <button type="submit">Submit</button>
+    <button type="submit">User data</button>
 </form>
 <ul class="user" ng-if="vm.user">
     <li ng-repeat="(key, value) in vm.user">

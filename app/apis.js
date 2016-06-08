@@ -60,9 +60,10 @@ module.exports = angular.module('twickApis', [
     ($resource, OAuthHeaderService) => {
         let corsproxyUrl = (url) => {
             return 'http://localhost:1337/' + url.replace(/https:\/\//g, '');
-        }
+        };
+
         return {
-            configResource: (httpMethod, url, reqParams, isArray) => {
+            configGetResource: (httpMethod, url, reqParams, isArray) => {
                 return $resource(
                     corsproxyUrl(url),
                     null,
@@ -77,6 +78,40 @@ module.exports = angular.module('twickApis', [
                     },
                     { stripTrailingSlashes: false }
                 ).get(reqParams).$promise;
+            },
+            configPostResource: (httpMethod, url, reqParams, isArray) => {
+                /**
+                 * hack for POST since it throw error for uri encoded symbol '!'
+                 * setting 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' didn't worked
+                 * so passing percent encoded param in url instread of body
+                 */
+                let percentEncode = (str) => {
+                  return encodeURIComponent(str).replace(/[!*()']/g, (character) => {
+                    return '%' + character.charCodeAt(0).toString(16);
+                  });
+                };
+                let setUrlParams = (url, reqParams) => {
+                    var urlWithParams = url;
+                    Object.keys(reqParams).map((value, index) => {
+                        urlWithParams += ((index == 0) ? '?' : '&') + value + '=' + escape(reqParams[value]);
+                    });
+                    return urlWithParams;
+                }
+
+                return $resource(
+                    corsproxyUrl(setUrlParams(url, reqParams)),
+                    null,
+                    {
+                        post: {
+                            method: httpMethod,
+                            isArray: isArray,
+                            headers: {
+                                'Authorization': OAuthHeaderService.getAuthorization(httpMethod, url, reqParams)
+                            }
+                        }
+                    },
+                    { stripTrailingSlashes: false }
+                ).post({}, {}).$promise;
             }
         }
     }
@@ -92,7 +127,7 @@ module.exports = angular.module('twickApis', [
                     httpMethod  = 'GET',
                     reqParams   = { screen_name: screen_name },
                     isArray     = false;
-                return resourceService.configResource(httpMethod, url, reqParams, isArray);
+                return resourceService.configGetResource(httpMethod, url, reqParams, isArray);
             }
         };
     }
@@ -108,7 +143,14 @@ module.exports = angular.module('twickApis', [
                     httpMethod  = 'GET',
                     reqParams   = { screen_name: screen_name },
                     isArray     = true;
-                return resourceService.configResource(httpMethod, url, reqParams, isArray);
+                return resourceService.configGetResource(httpMethod, url, reqParams, isArray);
+            },
+            update: (status) => {
+                let url         = baseUrl + 'update.json',
+                    httpMethod  = 'POST',
+                    reqParams   = { status: status },
+                    isArray     = false;
+                return resourceService.configPostResource(httpMethod, url, reqParams, isArray);
             }
         };
     }
