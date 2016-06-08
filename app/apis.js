@@ -53,28 +53,41 @@ module.exports = angular.module('twickApis', [
         }
     }
 ])
-
-.factory('UserShowFactory', [
+.service('resourceService', [
     '$resource',
     'OAuthHeaderService',
     function($resource, OAuthHeaderService) {
+        var corsproxyUrl = function(url) {
+            return 'http://localhost:1337/' + url.replace(/https:\/\//g, '');
+        }
         return {
-            get: function(screen_name) {
+            configResource: function(httpMethod, baseUrl, reqParams) {
+                return $resource(
+                    corsproxyUrl(baseUrl),
+                    null,
+                    {
+                        get: {
+                            method: httpMethod,
+                            headers: {
+                                'Authorization': OAuthHeaderService.getAuthorization(httpMethod, baseUrl, reqParams)
+                            }
+                        }
+                    },
+                    { stripTrailingSlashes: false }
+                ).get(reqParams).$promise
+            }
+        }
+    }
+])
+.factory('UsersFactory', [
+    'resourceService',
+    function(resourceService) {
+        return {
+            show: function(screen_name) {
                 var baseUrl         = 'https://api.twitter.com/1.1/users/show.json',
-                    corsProxyUrl    = 'http://localhost:1337/' + baseUrl.replace(/https:\/\//g, ''),
                     httpMethod      = 'GET',
                     reqParams       = { screen_name: screen_name };
-
-                return $resource(corsProxyUrl, null, {
-                    get: {
-                        method: httpMethod,
-                        headers: {
-                            'Authorization': OAuthHeaderService.getAuthorization(httpMethod, baseUrl, reqParams)
-                        }
-                    }
-                }, {
-                    stripTrailingSlashes: false
-                }).get(reqParams).$promise
+                return resourceService.configResource(httpMethod, baseUrl, reqParams);
             }
         };
     }
