@@ -2,4 +2,19 @@
     <input type="text" ng-model="vm.screen_name">
     <button type="submit">Submit</button>
 </form>
-<code>{{vm.data}}</code>
+<ul class="user" ng-if="vm.user">
+    <li ng-repeat="(key, value) in vm.user">
+        <span class="key">{{ key }}</span>:
+        <span class="value">{{ value }}</span>
+    </li>
+</ul>
+<ul class="timeline" ng-if="vm.user_timeline">
+    <li ng-repeat="tweet in vm.user_timeline">
+        <ul>
+            <li ng-repeat="(key, value) in tweet">
+                <span class="key">{{ key }}</span>:
+                <span class="value">{{ value }}</span>
+            </li>
+        </ul>
+    </li>
+</ul>

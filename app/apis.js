@@ -53,6 +53,7 @@ module.exports = angular.module('twickApis', [
         }
     }
 ])
+
 .service('resourceService', [
     '$resource',
     'OAuthHeaderService',
@@ -61,33 +62,53 @@ module.exports = angular.module('twickApis', [
             return 'http://localhost:1337/' + url.replace(/https:\/\//g, '');
         }
         return {
-            configResource: function(httpMethod, baseUrl, reqParams) {
+            configResource: function(httpMethod, url, reqParams, isArray) {
                 return $resource(
-                    corsproxyUrl(baseUrl),
+                    corsproxyUrl(url),
                     null,
                     {
                         get: {
                             method: httpMethod,
+                            isArray: isArray,
                             headers: {
-                                'Authorization': OAuthHeaderService.getAuthorization(httpMethod, baseUrl, reqParams)
+                                'Authorization': OAuthHeaderService.getAuthorization(httpMethod, url, reqParams)
                             }
                         }
                     },
                     { stripTrailingSlashes: false }
-                ).get(reqParams).$promise
+                ).get(reqParams).$promise;
             }
         }
     }
 ])
-.factory('UsersFactory', [
+
+.factory('UserFactory', [
     'resourceService',
     function(resourceService) {
+        var baseUrl = 'https://api.twitter.com/1.1/users/';
         return {
             show: function(screen_name) {
-                var baseUrl         = 'https://api.twitter.com/1.1/users/show.json',
-                    httpMethod      = 'GET',
-                    reqParams       = { screen_name: screen_name };
-                return resourceService.configResource(httpMethod, baseUrl, reqParams);
+                var url         = baseUrl + 'show.json',
+                    httpMethod  = 'GET',
+                    reqParams   = { screen_name: screen_name },
+                    isArray     = false;
+                return resourceService.configResource(httpMethod, url, reqParams, isArray);
+            }
+        };
+    }
+])
+
+.factory('StatusesFactory', [
+    'resourceService',
+    function(resourceService) {
+        var baseUrl = 'https://api.twitter.com/1.1/statuses/';
+        return {
+            user_timeline: function(screen_name) {
+                var url         = baseUrl + 'user_timeline.json',
+                    httpMethod  = 'GET',
+                    reqParams   = { screen_name: screen_name },
+                    isArray     = true;
+                return resourceService.configResource(httpMethod, url, reqParams, isArray);
             }
         };
     }
