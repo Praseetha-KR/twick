@@ -2,11 +2,15 @@
     <input type="text" ng-model="vm.status">
     <button type="submit">Tweet</button>
 </form>
-
+<form ng-submit="vm.search(vm.query)">
+    <input type="text" ng-model="vm.query">
+    <button type="submit">Search</button>
+</form>
 <form ng-submit="vm.showUser(vm.screen_name)">
     <input type="text" ng-model="vm.screen_name">
     <button type="submit">User data</button>
 </form>
+
 <ul class="user" ng-if="vm.user">
     <li ng-repeat="(key, value) in vm.user">
         <span class="key">{{ key }}</span>:
@@ -23,3 +27,15 @@
         </ul>
     </li>
 </ul>
+<ul class="search-result" ng-if="vm.search_result">
+    <li ng-repeat="(key, value) in vm.search_result">
+        <span class="key">{{ key }}</span>:
+        <ul>
+            <li ng-repeat="(k, v) in value">
+                <span class="key">{{ k }}</span>:
+                <span class="value">{{ v }}</span>
+            </li>
+        </ul>
+    </li>
+</ul>
+<!-- <button ng-if="vm.search_result.search_metadata.next_results" ng-click="vm.loadmore(vm.search_result.search_metadata.next_results)">load more</button> -->

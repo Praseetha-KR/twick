@@ -1,16 +1,61 @@
+var jsSHA = require('jssha');
+
 module.exports = angular.module('twickApis', [
     'ngResource'
 ])
 
 .service('OAuthHeaderService', [
     () => {
-
         let _mergeObjs = (obj1, obj2) => {
             for (var attr in obj2) {
                 obj1[attr] = obj2[attr];
             }
             return obj1;
         }
+
+        let hmac_sha1 = (string, secret) => {
+            let shaObj = new jsSHA("SHA-1", "TEXT");
+            shaObj.setHMACKey(secret, "TEXT");
+            shaObj.update(string);
+            let hmac = shaObj.getHMAC("B64");
+            return hmac;
+        }
+
+        let percentEncode = (str) => {
+          return encodeURIComponent(str).replace(/[!*()']/g, (character) => {
+            return '%' + character.charCodeAt(0).toString(16);
+          });
+        };
+
+        let oAuthBaseString = (method, url, params, key, token, timestamp, nonce) => {
+            let paramObj = _mergeObjs(
+                {
+                    oauth_consumer_key : key,
+                    oauth_nonce : nonce,
+                    oauth_signature_method : 'HMAC-SHA1',
+                    oauth_timestamp : timestamp,
+                    oauth_token : token,
+                    oauth_version : '1.0'
+                },
+                params
+            );
+            let paramObjKeys = Object.keys(paramObj);
+            paramObjKeys.sort();
+            let len = paramObjKeys.length;
+
+            let paramStr = paramObjKeys[0] + '=' + paramObj[paramObjKeys[0]];
+            for (var i = 1; i < len; i++) {
+                paramStr += '&' + paramObjKeys[i] + '=' + paramObj[paramObjKeys[i]];
+            }
+            return method + '&' + percentEncode(url) + '&' + percentEncode(paramStr);
+        };
+        let oAuthSigningKey = function(consumer_secret, token_secret) {
+            return consumer_secret + '&' + token_secret;
+        };
+        let oAuthSignature = function(base_string, signing_key) {
+            var signature = hmac_sha1(base_string, signing_key);
+            return percentEncode(signature);
+        };
 
         return {
             getAuthorization: (httpMethod, baseUrl, reqParams) => {
@@ -20,8 +65,8 @@ module.exports = angular.module('twickApis', [
                     accessToken         = keysJson.TWITTER_ACCESS_TOKEN,
                     accessTokenSecret   = keysJson.TWITTER_ACCESS_TOKEN_SECRET;
 
-                let timestamp   = Math.round(Date.now() / 1000);
-                let nonce       = btoa(consumerKey + ':' + timestamp);
+                let timestamp  = Math.round(Date.now() / 1000);
+                let nonce      = btoa(consumerKey + ':' + timestamp);
 
                 let oauthParams = {
                     oauth_consumer_key      : consumerKey,
@@ -31,8 +76,7 @@ module.exports = angular.module('twickApis', [
                     oauth_signature_method  : 'HMAC-SHA1',
                     oauth_version           : '1.0'
                 };
-                let params      = _mergeObjs(oauthParams, reqParams);
-
+                _mergeObjs(oauthParams, reqParams);
                 let encodedSignature = oauthSignature.generate(
                     httpMethod,
                     baseUrl,
@@ -41,10 +85,16 @@ module.exports = angular.module('twickApis', [
                     accessTokenSecret
                 );
 
+                let baseString = oAuthBaseString(httpMethod, baseUrl, reqParams, consumerKey, accessToken, timestamp, nonce);
+                let signingKey = oAuthSigningKey(consumerSecret, accessTokenSecret);
+                let signature  = oAuthSignature(baseString, signingKey);
+
+                console.log('custom', signature, 'lib', encodedSignature);
+
                 return 'OAuth '                                         +
                     'oauth_consumer_key="'  + consumerKey       + '", ' +
                     'oauth_nonce="'         + nonce             + '", ' +
-                    'oauth_signature="'     + encodedSignature  + '", ' +
+                    'oauth_signature="'     + signature         + '", ' +
                     'oauth_signature_method="HMAC-SHA1", '              +
                     'oauth_timestamp="'     + timestamp         + '", ' +
                     'oauth_token="'         + accessToken       + '", ' +
@@ -152,6 +202,29 @@ module.exports = angular.module('twickApis', [
                     isArray     = false;
                 return resourceService.configPostResource(httpMethod, url, reqParams, isArray);
             }
+        };
+    }
+])
+
+.factory('SearchFactory', [
+    'resourceService',
+    (resourceService) => {
+        let baseUrl = 'https://api.twitter.com/1.1/search/';
+        return {
+            search_tweets: (query) => {
+                let url         = baseUrl + 'tweets.json',
+                    httpMethod  = 'GET',
+                    reqParams   = { q: query },
+                    isArray     = false;
+                return resourceService.configGetResource(httpMethod, url, reqParams, isArray);
+            },
+            // next: (nextUrl) => {
+            //     let url         = baseUrl + 'tweets.json' + nextUrl,
+            //         httpMethod  = 'GET',
+            //         reqParams   = {},
+            //         isArray     = false;
+            //     return resourceService.configGetResource(httpMethod, url, reqParams, isArray);
+            // }
         };
     }
 ]);
