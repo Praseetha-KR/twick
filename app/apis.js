@@ -1,12 +1,18 @@
 var jsSHA = require('jssha');
 
+let percentEncode = (str) => {
+  return encodeURIComponent(str).replace(/[!*()']/g, (character) => {
+    return '%' + character.charCodeAt(0).toString(16);
+  });
+};
+
 module.exports = angular.module('twickApis', [
     'ngResource'
 ])
 
 .service('OAuthHeaderService', [
     () => {
-        let _mergeObjs = (obj1, obj2) => {
+        let mergeObjs = (obj1, obj2) => {
             for (var attr in obj2) {
                 obj1[attr] = obj2[attr];
             }
@@ -21,14 +27,8 @@ module.exports = angular.module('twickApis', [
             return hmac;
         }
 
-        let percentEncode = (str) => {
-          return encodeURIComponent(str).replace(/[!*()']/g, (character) => {
-            return '%' + character.charCodeAt(0).toString(16);
-          });
-        };
-
         let oAuthBaseString = (method, url, params, key, token, timestamp, nonce) => {
-            let paramObj = _mergeObjs(
+            let paramObj = mergeObjs(
                 {
                     oauth_consumer_key : key,
                     oauth_nonce : nonce,
@@ -39,14 +39,16 @@ module.exports = angular.module('twickApis', [
                 },
                 params
             );
+
             let paramObjKeys = Object.keys(paramObj);
             paramObjKeys.sort();
             let len = paramObjKeys.length;
 
             let paramStr = paramObjKeys[0] + '=' + paramObj[paramObjKeys[0]];
             for (var i = 1; i < len; i++) {
-                paramStr += '&' + paramObjKeys[i] + '=' + paramObj[paramObjKeys[i]];
+                paramStr += '&' + paramObjKeys[i] + '=' + percentEncode(paramObj[paramObjKeys[i]]);
             }
+            console.log(percentEncode(paramStr));
             return method + '&' + percentEncode(url) + '&' + percentEncode(paramStr);
         };
         let oAuthSigningKey = function(consumer_secret, token_secret) {
@@ -68,6 +70,7 @@ module.exports = angular.module('twickApis', [
                 let timestamp  = Math.round(Date.now() / 1000);
                 let nonce      = btoa(consumerKey + ':' + timestamp);
 
+                //////
                 let oauthParams = {
                     oauth_consumer_key      : consumerKey,
                     oauth_token             : accessToken,
@@ -76,7 +79,7 @@ module.exports = angular.module('twickApis', [
                     oauth_signature_method  : 'HMAC-SHA1',
                     oauth_version           : '1.0'
                 };
-                _mergeObjs(oauthParams, reqParams);
+                mergeObjs(oauthParams, reqParams);
                 let encodedSignature = oauthSignature.generate(
                     httpMethod,
                     baseUrl,
@@ -84,8 +87,9 @@ module.exports = angular.module('twickApis', [
                     consumerSecret,
                     accessTokenSecret
                 );
-
+                /////
                 let baseString = oAuthBaseString(httpMethod, baseUrl, reqParams, consumerKey, accessToken, timestamp, nonce);
+                console.log(baseString);
                 let signingKey = oAuthSigningKey(consumerSecret, accessTokenSecret);
                 let signature  = oAuthSignature(baseString, signingKey);
 
@@ -135,11 +139,7 @@ module.exports = angular.module('twickApis', [
                  * setting 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' didn't worked
                  * so passing percent encoded param in url instread of body
                  */
-                let percentEncode = (str) => {
-                  return encodeURIComponent(str).replace(/[!*()']/g, (character) => {
-                    return '%' + character.charCodeAt(0).toString(16);
-                  });
-                };
+
                 let setUrlParams = (url, reqParams) => {
                     var urlWithParams = url;
                     Object.keys(reqParams).map((value, index) => {
