@@ -1,23 +1,24 @@
 var jsSHA = require('jssha');
 
-let percentEncode = (str) => {
-  return encodeURIComponent(str).replace(/[!*()']/g, (character) => {
-    return '%' + character.charCodeAt(0).toString(16);
-  });
-};
-
 module.exports = angular.module('twickApis', [
     'ngResource'
 ])
 
 .service('OAuthHeaderService', [
     () => {
+
         let mergeObjs = (obj1, obj2) => {
             for (var attr in obj2) {
                 obj1[attr] = obj2[attr];
             }
             return obj1;
-        }
+        };
+
+        let percentEncode = (str) => {
+          return encodeURIComponent(str).replace(/[!*()']/g, (character) => {
+            return '%' + character.charCodeAt(0).toString(16);
+          });
+        };
 
         let hmac_sha1 = (string, secret) => {
             let shaObj = new jsSHA("SHA-1", "TEXT");
@@ -43,17 +44,17 @@ module.exports = angular.module('twickApis', [
             let paramObjKeys = Object.keys(paramObj);
             paramObjKeys.sort();
             let len = paramObjKeys.length;
-
             let paramStr = paramObjKeys[0] + '=' + paramObj[paramObjKeys[0]];
             for (var i = 1; i < len; i++) {
-                paramStr += '&' + paramObjKeys[i] + '=' + percentEncode(paramObj[paramObjKeys[i]]);
+                paramStr += '&' + paramObjKeys[i] + '=' + percentEncode(decodeURIComponent(paramObj[paramObjKeys[i]]));
             }
-            console.log(percentEncode(paramStr));
             return method + '&' + percentEncode(url) + '&' + percentEncode(paramStr);
         };
+
         let oAuthSigningKey = function(consumer_secret, token_secret) {
             return consumer_secret + '&' + token_secret;
         };
+
         let oAuthSignature = function(base_string, signing_key) {
             var signature = hmac_sha1(base_string, signing_key);
             return percentEncode(signature);
@@ -70,30 +71,9 @@ module.exports = angular.module('twickApis', [
                 let timestamp  = Math.round(Date.now() / 1000);
                 let nonce      = btoa(consumerKey + ':' + timestamp);
 
-                //////
-                let oauthParams = {
-                    oauth_consumer_key      : consumerKey,
-                    oauth_token             : accessToken,
-                    oauth_nonce             : nonce,
-                    oauth_timestamp         : timestamp,
-                    oauth_signature_method  : 'HMAC-SHA1',
-                    oauth_version           : '1.0'
-                };
-                mergeObjs(oauthParams, reqParams);
-                let encodedSignature = oauthSignature.generate(
-                    httpMethod,
-                    baseUrl,
-                    oauthParams,
-                    consumerSecret,
-                    accessTokenSecret
-                );
-                /////
                 let baseString = oAuthBaseString(httpMethod, baseUrl, reqParams, consumerKey, accessToken, timestamp, nonce);
-                console.log(baseString);
                 let signingKey = oAuthSigningKey(consumerSecret, accessTokenSecret);
                 let signature  = oAuthSignature(baseString, signingKey);
-
-                console.log('custom', signature, 'lib', encodedSignature);
 
                 return 'OAuth '                                         +
                     'oauth_consumer_key="'  + consumerKey       + '", ' +
