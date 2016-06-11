@@ -26,9 +26,9 @@ module.exports = angular.module('twickApis', [
             shaObj.update(string);
             let hmac = shaObj.getHMAC("B64");
             return hmac;
-        }
+        };
 
-        let oAuthBaseString = (method, url, params, key, token, timestamp, nonce) => {
+        let genSortedParamStr = (params, key, token, timestamp, nonce) => {
             let paramObj = mergeObjs(
                 {
                     oauth_consumer_key : key,
@@ -48,7 +48,13 @@ module.exports = angular.module('twickApis', [
             for (var i = 1; i < len; i++) {
                 paramStr += '&' + paramObjKeys[i] + '=' + percentEncode(decodeURIComponent(paramObj[paramObjKeys[i]]));
             }
-            return method + '&' + percentEncode(url) + '&' + percentEncode(paramStr);
+            return paramStr;
+        };
+
+        let oAuthBaseString = (method, url, params, key, token, timestamp, nonce) => {
+            return method
+                    + '&' + percentEncode(url)
+                    + '&' + percentEncode(genSortedParamStr(params, key, token, timestamp, nonce));
         };
 
         let oAuthSigningKey = function(consumer_secret, token_secret) {
