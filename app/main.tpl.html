@@ -17,16 +17,15 @@
         <span class="value">{{ value }}</span>
     </li>
 </ul>
-<ul class="timeline" ng-if="vm.user_timeline">
-    <li ng-repeat="tweet in vm.user_timeline">
-        <ul>
-            <li ng-repeat="(key, value) in tweet">
-                <span class="key">{{ key }}</span>:
-                <span class="value">{{ value }}</span>
-            </li>
-        </ul>
-    </li>
-</ul>
+<section class="timeline" ng-if="vm.user_timeline">
+    <tweet tweet="tweet" ng-repeat="tweet in vm.user_timeline"></tweet>
+    <!-- <ul>
+        <li ng-repeat="(key, value) in tweet">
+            <span class="key">{{ key }}</span>:
+            <span class="value">{{ value }}</span>
+        </li>
+    </ul> -->
+</section>
 <ul class="search-result" ng-if="vm.search_result">
     <li ng-repeat="(key, value) in vm.search_result">
         <span class="key">{{ key }}</span>:

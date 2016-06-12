@@ -15,6 +15,18 @@ var app = angular.module('twick', [
     }
 ])
 
+.directive('tweet', [function() {
+    return {
+        restrict: 'E',
+        scope: {
+            tweet: '='
+        },
+        templateUrl: '/app/tweet.tpl.html',
+        link: function(scope, elem, attr) {
+            // scope.tweet = tweet;
+        }
+    }
+}])
 .controller('twickController', [
     '$log',
     'UserFactory',
@@ -25,7 +37,7 @@ var app = angular.module('twick', [
 
 function twickFn($log, UserFactory, StatusesFactory, SearchFactory) {
     let vm  = this;
-    vm.screen_name = 'twitterdev';
+    vm.screen_name = 'void_imagineer';
     vm.showUser = (screen_name) => {
         UserFactory.show(screen_name)
             .then((data) => vm.user = data)
